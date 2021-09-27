@@ -17,9 +17,9 @@ namespace Audacia.OrToolsPlayground.Tests.AssignPizza
             var random = new System.Random();
             var employees = new List<Employee>
             {
-                new(random.Forename(), margheritaPreference: 6, pepperoniPreference: 2, hawaiianPreference: 2),
-                new(random.Forename(), margheritaPreference: 10, pepperoniPreference: 8, hawaiianPreference: 6),
-                new(random.Forename(), margheritaPreference: 10, pepperoniPreference: 9, hawaiianPreference: 2),
+                new(random.Forename(), random.Next(0, 10), random.Next(0, 10), random.Next(0, 10)),
+                new(random.Forename(), random.Next(0, 10), random.Next(0, 10), random.Next(0, 10)),
+                new(random.Forename(), random.Next(0, 10), random.Next(0, 10), random.Next(0, 10))
             };
             var model = new AssignPizzaModel
             {
@@ -29,13 +29,13 @@ namespace Audacia.OrToolsPlayground.Tests.AssignPizza
                     .Select(_ => random.Enum<PizzaType>())
                     .ToList()
             };
-            
+
             var solver = new AssignPizzaSolver(model);
             var assignment = solver.Solve();
 
-            assignment.Keys.Should().HaveCount(employees.Count);
+            assignment.Should().HaveCount(employees.Count);
         }
-        
+
         [Fact]
         public void Undesirable_pizzas_are_left_over()
         {
@@ -51,13 +51,13 @@ namespace Audacia.OrToolsPlayground.Tests.AssignPizza
                 Employees = employees,
                 Pizzas = new List<PizzaType> {PizzaType.Margherita, PizzaType.Pepperoni, PizzaType.Hawaiian}
             };
-            
+
             var solver = new AssignPizzaSolver(model);
             var assignment = solver.Solve();
 
             assignment.Values.Should().NotContain(PizzaType.Hawaiian);
         }
-        
+
         [Fact]
         public void Assigns_pizzas_that_people_like_the_most()
         {
@@ -69,14 +69,14 @@ namespace Audacia.OrToolsPlayground.Tests.AssignPizza
             {
                 new(firstPerson, margheritaPreference: 6, pepperoniPreference: 2, hawaiianPreference: 2),
                 new(secondPerson, margheritaPreference: 10, pepperoniPreference: 8, hawaiianPreference: 7),
-                new(thirdPerson, margheritaPreference: 10, pepperoniPreference: 9, hawaiianPreference: 2),
+                new(thirdPerson, margheritaPreference: 10, pepperoniPreference: 9, hawaiianPreference: 2)
             };
             var model = new AssignPizzaModel
             {
                 Employees = employees,
                 Pizzas = new List<PizzaType> {PizzaType.Margherita, PizzaType.Pepperoni, PizzaType.Hawaiian}
             };
-            
+
             var solver = new AssignPizzaSolver(model);
             var assignment = solver.Solve();
 

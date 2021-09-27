@@ -50,7 +50,7 @@ namespace Audacia.OrToolsPlayground.Tests.MakePizza
             
             var solution = solver.Solve();
 
-            const long expectedFinish = 138L;
+            const long expectedFinish = 138;
             solution.Finish.Should().Be(expectedFinish);
         }
 

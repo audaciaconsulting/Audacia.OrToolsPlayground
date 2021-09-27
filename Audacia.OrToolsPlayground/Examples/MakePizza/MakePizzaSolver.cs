@@ -128,8 +128,8 @@ namespace Audacia.OrToolsPlayground.Examples.MakePizza
         /// For each stage that needs to be performed, add <see cref="IntervalVar"/>s to the model, with variables
         /// for their potential start time.
         /// </summary>
-        /// <param name="wrapper"></param>
-        private void CreateIntervalVars(PizzaCpModel wrapper)
+        /// <param name="model"></param>
+        private void CreateIntervalVars(PizzaCpModel model)
         {
             for (var pizzaIndex = 0; pizzaIndex < _request.Types.Count; pizzaIndex++)
             {
@@ -138,15 +138,15 @@ namespace Audacia.OrToolsPlayground.Examples.MakePizza
                 {
                     var stageName = $"pizza_{pizzaIndex}_{cookingStage}";
                     // Create variables for when this stage starts and finishes
-                    var startVar = wrapper.NewIntVar(0, _horizon, $"{stageName}_start");
-                    var endVar = wrapper.NewIntVar(0, _horizon, $"{stageName}_end");
+                    var startVar = model.NewIntVar(0, _horizon, $"{stageName}_start");
+                    var endVar = model.NewIntVar(0, _horizon, $"{stageName}_end");
                     if (cookingStage == CookingStage.Cooking)
                     {
                         // If this stage is cooking, there is only one 'machine' option, so we can have a mandatory interval var
                         var stageVar =
-                            wrapper.NewIntervalVar(startVar, duration, endVar, $"{stageName}_interval");
-                        wrapper.PizzaStageIntervals[pizzaIndex].Add(stageVar);
-                        wrapper.MachineIntervals[OvenId].Add(stageVar);
+                            model.NewIntervalVar(startVar, duration, endVar, $"{stageName}_interval");
+                        model.PizzaStageIntervals[pizzaIndex].Add(stageVar);
+                        model.MachineIntervals[OvenId].Add(stageVar);
                     }
                     else
                     {
@@ -156,29 +156,29 @@ namespace Audacia.OrToolsPlayground.Examples.MakePizza
                         for (var chefIndex = 1; chefIndex <= _request.NumberOfChefs; chefIndex++)
                         {
                             // If we're not cooking, we have a choice of chefs who can perform this task.
-                            var chefActivation = wrapper.NewBoolVar($"{stageName}_chef_{chefIndex}");
-                            IntVar chefStartVar = wrapper.NewIntVar(0, _horizon, $"{stageName}_start");
-                            IntVar chefEndVar = wrapper.NewIntVar(0, _horizon, $"{stageName}_end");
+                            var chefActivation = model.NewBoolVar($"{stageName}_chef_{chefIndex}");
+                            IntVar chefStartVar = model.NewIntVar(0, _horizon, $"{stageName}_start");
+                            IntVar chefEndVar = model.NewIntVar(0, _horizon, $"{stageName}_end");
 
                             // Create an optional interval. This sets the chefActivation to true if the chef is chosen.
                             var stageVar =
-                                wrapper.NewOptionalIntervalVar(startVar, duration, endVar, chefActivation,
+                                model.NewOptionalIntervalVar(startVar, duration, endVar, chefActivation,
                                     $"{stageName}_interval");
-                            wrapper.PizzaStageIntervals[pizzaIndex].Add(stageVar);
-                            wrapper.MachineIntervals[chefIndex].Add(stageVar);
+                            model.PizzaStageIntervals[pizzaIndex].Add(stageVar);
+                            model.MachineIntervals[chefIndex].Add(stageVar);
 
                             // Bind this chef's start and end variables to the actual start and end, if we choose this chef
-                            wrapper.Add(chefStartVar == startVar).OnlyEnforceIf(chefActivation);
-                            wrapper.Add(chefEndVar == endVar).OnlyEnforceIf(chefActivation);
+                            model.Add(chefStartVar == startVar).OnlyEnforceIf(chefActivation);
+                            model.Add(chefEndVar == endVar).OnlyEnforceIf(chefActivation);
                             chefActivations.Add(chefActivation);
                         }
 
                         // Ensure a chef is chosen for this pizza
-                        wrapper.Add(new SumArray(chefActivations) == 1);
+                        model.Add(new SumArray(chefActivations) == 1);
                     }
 
-                    wrapper.PizzaStageStarts[pizzaIndex].Add(startVar);
-                    wrapper.PizzaStageEnds[pizzaIndex].Add(endVar);
+                    model.PizzaStageStarts[pizzaIndex].Add(startVar);
+                    model.PizzaStageEnds[pizzaIndex].Add(endVar);
                 }
             }
         }
