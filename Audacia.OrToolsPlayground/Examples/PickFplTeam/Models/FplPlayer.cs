@@ -20,7 +20,9 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam.Models
 
         [Name("chance_of_playing_next_round")] public string ChanceOfPlayingNextRound { get; set; } = null!;
 
-        public bool ShouldAdd => ChanceOfPlayingNextRound == "None";
+        [Name("form")] public decimal Form { get; set; }
+
+        public bool ShouldAdd => (ChanceOfPlayingNextRound == "None" || ChanceOfPlayingNextRound == "100") && Form > 4;
 
         public override string ToString()
         {

@@ -123,11 +123,11 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam
             model.Add(numberSelectedForwards == _request.Options.NumberForwards);
         }
 
-        private static void AddMaxPerTeamConstraint(PickFplTeamCpModel model)
+        private void AddMaxPerTeamConstraint(PickFplTeamCpModel model)
         {
             foreach (var (_, selectedPlayers) in model.TeamDicts)
             {
-                model.Add(new SumArray(selectedPlayers) <= 3);
+                model.Add(new SumArray(selectedPlayers) <= _request.Options.MaxPlayersPerTeam);
             }
         }
 

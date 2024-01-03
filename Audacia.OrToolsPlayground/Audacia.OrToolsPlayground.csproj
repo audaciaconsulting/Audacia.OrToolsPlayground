@@ -12,4 +12,11 @@
       <PackageReference Include="Google.OrTools.runtime.win-x64" Version="9.0.9048" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Examples\PickFplTeam\Data\players_raw.csv" />
+      <EmbeddedResource Include="Examples\PickFplTeam\Data\players_raw.csv">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+    </ItemGroup>
+
 </Project>
