@@ -20,11 +20,7 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam.Models
 
         [Name("chance_of_playing_next_round")] public string ChanceOfPlayingNextRound { get; set; } = null!;
 
-        public bool ShouldAdd => ChanceOfPlayingNextRound == "None"
-                                 // Harry Kane
-                                 && Id != 500
-                                 // David Raya
-                                 && Id != 113;
+        public bool ShouldAdd => ChanceOfPlayingNextRound == "None";
 
         public override string ToString()
         {
