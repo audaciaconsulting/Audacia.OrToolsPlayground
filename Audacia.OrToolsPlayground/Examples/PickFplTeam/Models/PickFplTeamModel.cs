@@ -11,7 +11,7 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam.Models
 {
     public class PickFplTeamModel
     {
-        private PickFplTeamModel(List<FplPlayer> players, PickFplTeamOptions options)
+        public PickFplTeamModel(List<FplPlayer> players, PickFplTeamOptions options)
         {
             Players = players;
             Options = options;

@@ -70,13 +70,13 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam
                 model.Add(teamSelected == 1).OnlyEnforceIf(selection.SelectedDefender);
                 model.Add(teamSelected == 1).OnlyEnforceIf(selection.SelectedMidfielder);
                 model.Add(teamSelected == 1).OnlyEnforceIf(selection.SelectedForward);
-                if (model.TeamDicts.ContainsKey(fplPlayer.TeamId))
+                if (model.TeamSelectionCounts.ContainsKey(fplPlayer.TeamId))
                 {
-                    model.TeamDicts[fplPlayer.TeamId].Add(teamSelected);
+                    model.TeamSelectionCounts[fplPlayer.TeamId].Add(teamSelected);
                 }
                 else
                 {
-                    model.TeamDicts.Add(fplPlayer.TeamId, new List<IntVar> { teamSelected });
+                    model.TeamSelectionCounts.Add(fplPlayer.TeamId, new List<IntVar> { teamSelected });
                 }
             }
         }
@@ -125,7 +125,7 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam
 
         private void AddMaxPerTeamConstraint(PickFplTeamCpModel model)
         {
-            foreach (var (_, selectedPlayers) in model.TeamDicts)
+            foreach (var (_, selectedPlayers) in model.TeamSelectionCounts)
             {
                 model.Add(new SumArray(selectedPlayers) <= _request.Options.MaxPlayersPerTeam);
             }
@@ -144,6 +144,8 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam
             var isDefender = fplPlayer.Position == PlayerPosition.Defender;
             var isMidfielder = fplPlayer.Position == PlayerPosition.Midfielder;
             var isForward = fplPlayer.Position == PlayerPosition.Forward;
+            
+            // Player cannot be selected for a position if they don't play in that position.
             if (!isGoalkeeper)
             {
                 model.Add(selection.SelectedGoalkeeper == 0);
