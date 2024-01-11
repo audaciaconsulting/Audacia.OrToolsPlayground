@@ -1,13 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <LangVersion>latestmajor</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="CsvHelper" Version="30.0.1" />
       <PackageReference Include="Google.OrTools" Version="9.0.9048" />
       <PackageReference Include="Google.OrTools.runtime.win-x64" Version="9.0.9048" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Examples\PickFplTeam\Data\players_raw.csv" />
+      <EmbeddedResource Include="Examples\PickFplTeam\Data\players_raw.csv">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>
