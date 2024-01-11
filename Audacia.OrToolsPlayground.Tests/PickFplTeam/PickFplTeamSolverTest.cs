@@ -3,13 +3,12 @@ using System.Linq;
 using Audacia.OrToolsPlayground.Examples.PickFplTeam;
 using Audacia.OrToolsPlayground.Examples.PickFplTeam.Models;
 using Audacia.OrToolsPlayground.Tests.PickFplTeam.Builders;
-using Audacia.Random.Extensions;
 using FluentAssertions;
 using Xunit;
 
 namespace Audacia.OrToolsPlayground.Tests.PickFplTeam;
 
-public class PickFplTeamSolverTest
+public class PickFplTeamSolverTest// for some reason we lose intellisense if we call this PickFplTeamSolverTests...
 {
     [Fact]
     public void RealWorldScenario_CanFindASolution()
@@ -26,7 +25,7 @@ public class PickFplTeamSolverTest
 
         var output = solver.Solve();
 
-        output.SelectedPlayers.Should().HaveCount(15);
+        output.SelectedPlayers.Should().HaveCount(15, "we should have 2 GK + 5 DEF + 5 MID + 3 FWD");
     }
 
     [Fact]
