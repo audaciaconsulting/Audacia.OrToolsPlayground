@@ -9,22 +9,22 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam.Models;
 public class FplPlayerSelectionVar
 {
     /// <summary>
-    /// Gets or sets a variable set to whether we've selected this player as a <see cref="PlayerPosition.Goalkeeper"/>.
+    /// Gets or sets a variable set to whether we've selected this player as a <see cref="PlayerPosition.GK"/>.
     /// </summary>
     public IntVar SelectedGoalkeeper { get; set; } = null!;
     
     /// <summary>
-    /// Gets or sets a variable set to whether we've selected this player as a <see cref="PlayerPosition.Defender"/>.
+    /// Gets or sets a variable set to whether we've selected this player as a <see cref="PlayerPosition.DEF"/>.
     /// </summary>
     public IntVar SelectedDefender { get; set; } = null!;
     
     /// <summary>
-    /// Gets or sets a variable set to whether we've selected this player as a <see cref="PlayerPosition.Midfielder"/>.
+    /// Gets or sets a variable set to whether we've selected this player as a <see cref="PlayerPosition.MID"/>.
     /// </summary>
     public IntVar SelectedMidfielder { get; set; } = null!;
     
     /// <summary>
-    /// Gets or sets a variable set to whether we've selected this player as a <see cref="PlayerPosition.Forward"/>.
+    /// Gets or sets a variable set to whether we've selected this player as a <see cref="PlayerPosition.FWD"/>.
     /// </summary>
     public IntVar SelectedForward { get; set; } = null!;
 }

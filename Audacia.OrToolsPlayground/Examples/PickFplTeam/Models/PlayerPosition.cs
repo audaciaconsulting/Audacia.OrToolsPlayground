@@ -2,9 +2,9 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam.Models
 {
     public enum PlayerPosition
     {
-        Goalkeeper = 1,
-        Defender = 2,
-        Midfielder = 3,
-        Forward = 4,
+        GK = 1,
+        DEF = 2,
+        MID = 3,
+        FWD = 4,
     }
 }

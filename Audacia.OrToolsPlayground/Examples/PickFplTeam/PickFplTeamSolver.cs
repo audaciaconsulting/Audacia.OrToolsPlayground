@@ -64,26 +64,26 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam
 
                 model.Selections.Add(selection);
 
-                var teamSelected = model.NewBoolVar($"{fplPlayer}_selected_{fplPlayer.TeamId}");
+                var teamSelected = model.NewBoolVar($"{fplPlayer}_selected_{fplPlayer.Team}");
 
                 model.Add(teamSelected == 1).OnlyEnforceIf(selection.SelectedGoalkeeper);
                 model.Add(teamSelected == 1).OnlyEnforceIf(selection.SelectedDefender);
                 model.Add(teamSelected == 1).OnlyEnforceIf(selection.SelectedMidfielder);
                 model.Add(teamSelected == 1).OnlyEnforceIf(selection.SelectedForward);
-                if (model.TeamSelectionCounts.ContainsKey(fplPlayer.TeamId))
+                if (model.TeamSelectionCounts.ContainsKey(fplPlayer.Team))
                 {
-                    model.TeamSelectionCounts[fplPlayer.TeamId].Add(teamSelected);
+                    model.TeamSelectionCounts[fplPlayer.Team].Add(teamSelected);
                 }
                 else
                 {
-                    model.TeamSelectionCounts.Add(fplPlayer.TeamId, new List<IntVar> { teamSelected });
+                    model.TeamSelectionCounts.Add(fplPlayer.Team, new List<IntVar> { teamSelected });
                 }
             }
         }
 
         private void AddObjective(PickFplTeamCpModel model)
         {
-            var points = _request.Players.Select(r => r.Points).ToList();
+            var points = _request.Players.Select(r => r.PercentSelectedBy).ToList();
             var goalkeeperPoints = LinearExpr.ScalProd(model.SelectedGoalkeepers, points);
             var defenderPoints = LinearExpr.ScalProd(model.SelectedDefenders, points);
             var midfielderPoints = LinearExpr.ScalProd(model.SelectedMidfielders, points);
@@ -140,11 +140,11 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam
                 SelectedMidfielder = model.NewBoolVar($"{fplPlayer}_selected_mid"),
                 SelectedForward = model.NewBoolVar($"{fplPlayer}_selected_fwd"),
             };
-            var isGoalkeeper = fplPlayer.Position == PlayerPosition.Goalkeeper;
-            var isDefender = fplPlayer.Position == PlayerPosition.Defender;
-            var isMidfielder = fplPlayer.Position == PlayerPosition.Midfielder;
-            var isForward = fplPlayer.Position == PlayerPosition.Forward;
-            
+            var isGoalkeeper = fplPlayer.Position == PlayerPosition.GK;
+            var isDefender = fplPlayer.Position == PlayerPosition.DEF;
+            var isMidfielder = fplPlayer.Position == PlayerPosition.MID;
+            var isForward = fplPlayer.Position == PlayerPosition.FWD;
+
             // Player cannot be selected for a position if they don't play in that position.
             if (!isGoalkeeper)
             {

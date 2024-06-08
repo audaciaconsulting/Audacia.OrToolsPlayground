@@ -4,29 +4,33 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam.Models
 {
     public class FplPlayer
     {
-        [Name("id")] public int Id { get; set; }
+        [Name("name")]
+        public string Name { get; set; } = null!;
 
-        [Name("first_name")] public string FirstName { get; set; } = null!;
+        [Name("team")]
+        public string Team { get; set; } = null!;
 
-        [Name("second_name")] public string Surname { get; set; } = null!;
+        /// <summary>
+        /// Gets or sets raw cost in millions.
+        /// </summary>
+        [Name("cost")]
+        public decimal CostMillions { get; set; }
 
-        [Name("total_points")] public int Points { get; set; }
+        /// <summary>
+        /// Gets the cost in an OR-Tools friendly format (i.e no decimals).
+        /// Assumes cost  never has > 1dp specificity.
+        /// </summary>
+        public int Cost => (int)(CostMillions * 10);
 
-        [Name("now_cost")] public long Cost { get; set; }
+        [Name("pos")]
+        public PlayerPosition Position { get; set; }
 
-        [Name("team")] public int TeamId { get; set; }
-
-        [Name("element_type")] public PlayerPosition Position { get; set; }
-
-        [Name("chance_of_playing_next_round")] public string ChanceOfPlayingNextRound { get; set; } = null!;
-
-        [Name("form")] public decimal Form { get; set; }
-
-        public bool ShouldAdd => (ChanceOfPlayingNextRound == "None" || ChanceOfPlayingNextRound == "100") && Form > 4;
+        [Name("sel")]
+        public int PercentSelectedBy { get; set; }
 
         public override string ToString()
         {
-            return $"{FirstName}_{Surname}_{Id}".Replace(" ", "_");
+            return $"{Name}-{Team}-{Position}".Replace(" ", "_");
         }
     }
 }

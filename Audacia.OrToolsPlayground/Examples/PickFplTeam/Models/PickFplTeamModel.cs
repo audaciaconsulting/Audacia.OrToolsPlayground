@@ -26,11 +26,10 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam.Models
             using var reader = new StreamReader(stream!);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
             var players = csv.GetRecords<FplPlayer>()
-                .Where(p => p.ShouldAdd)
                 .ToList();
             return new PickFplTeamModel(players, options);
         }
-        
+
         public List<FplPlayer> Players { get; }
 
         public PickFplTeamOptions Options { get; }

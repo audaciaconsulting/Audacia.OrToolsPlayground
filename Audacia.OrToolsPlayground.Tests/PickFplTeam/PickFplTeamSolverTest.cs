@@ -16,7 +16,7 @@ public class PickFplTeamSolverTest// for some reason we lose intellisense if we 
         var solver = new PickFplTeamSolver(PickFplTeamModel.FromCsv(new PickFplTeamOptions
         {
             MaxPlayersPerTeam = 3,
-            Budget = 1002,
+            BudgetMillions = 100,
             NumberGoalkeepers = 2,
             NumberDefenders = 5,
             NumberMidfielders = 5,
@@ -34,16 +34,16 @@ public class PickFplTeamSolverTest// for some reason we lose intellisense if we 
         var options = new PickFplTeamOptions
         {
             MaxPlayersPerTeam = 2,
-            Budget = 1000,
+            BudgetMillions = 100,
             NumberDefenders = 3,
         };
         var goodPlayers = Enumerable.Range(0, 3)
-            .Select(_ => new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Defender)
-                .WithPoints(100)
+            .Select(_ => new FplPlayerBuilder("ENG", PlayerPosition.DEF)
+                .WithSelectedByPercentage(100)
                 .Build())
             .ToList();
         var badPlayers = Enumerable.Range(0, 3)
-            .Select(_ => new FplPlayerBuilder(Team.ManchesterUnited, PlayerPosition.Defender).Build())
+            .Select(_ => new FplPlayerBuilder("GER", PlayerPosition.DEF).Build())
             .ToList();
         var model = new PickFplTeamModel(goodPlayers.Concat(badPlayers).ToList(), options);
         var solver = new PickFplTeamSolver(model);
@@ -51,7 +51,7 @@ public class PickFplTeamSolverTest// for some reason we lose intellisense if we 
         var output = solver.Solve();
 
         output.SelectedPlayers.Should().Contain(
-            p => p.TeamId == Team.ManchesterUnited,
+            p => p.Team == "GER",
             $"we can only have {options.MaxPlayersPerTeam} max players per team");
     }
 
@@ -61,14 +61,15 @@ public class PickFplTeamSolverTest// for some reason we lose intellisense if we 
         var options = new PickFplTeamOptions
         {
             NumberDefenders = 2,
-            NumberMidfielders = 1
+            NumberMidfielders = 1,
+            BudgetMillions = 100
         };
         var players = new List<FplPlayer>
         {
-            new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Defender).WithPoints(100).Build(),
-            new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Defender).WithPoints(100).Build(),
-            new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Defender).WithPoints(100).Build(),
-            new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Midfielder).WithPoints(0).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.DEF).WithSelectedByPercentage(100).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.DEF).WithSelectedByPercentage(100).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.DEF).WithSelectedByPercentage(100).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.MID).WithSelectedByPercentage(0).Build(),
         };
         var model = new PickFplTeamModel(players, options);
         var solver = new PickFplTeamSolver(model);
@@ -76,7 +77,7 @@ public class PickFplTeamSolverTest// for some reason we lose intellisense if we 
         var output = solver.Solve();
 
         output.SelectedPlayers.Should().Contain(
-            p => p.Position == PlayerPosition.Midfielder,
+            p => p.Position == PlayerPosition.MID,
             $"we can only have {options.MaxPlayersPerTeam} max players per team");
     }
 
@@ -85,23 +86,23 @@ public class PickFplTeamSolverTest// for some reason we lose intellisense if we 
     {
         var options = new PickFplTeamOptions
         {
-            Budget = 100,
+            BudgetMillions = 10,
             NumberGoalkeepers = 1,
             NumberDefenders = 1,
             NumberMidfielders = 1,
             NumberForwards = 1
         };
-        var expensivePlayer = new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Forward)
-            .WithCost(26)
-            .WithPoints(100)
+        var expensivePlayer = new FplPlayerBuilder("ENG", PlayerPosition.FWD)
+            .WithCost(2.6m)
+            .WithSelectedByPercentage(100)
             .Build();
         var players = new List<FplPlayer>
         {
-            new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Goalkeeper).WithCost(25).Build(),
-            new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Defender).WithCost(25).Build(),
-            new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Midfielder).WithCost(25).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.GK).WithCost(2.5m).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.DEF).WithCost(2.5m).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.MID).WithCost(2.5m).Build(),
             expensivePlayer,
-            new FplPlayerBuilder(Team.Liverpool, PlayerPosition.Forward).WithCost(25).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.FWD).WithCost(2.5m).Build(),
         };
         var model = new PickFplTeamModel(players, options);
         var solver = new PickFplTeamSolver(model);

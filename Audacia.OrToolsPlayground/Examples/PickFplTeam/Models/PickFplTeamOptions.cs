@@ -4,7 +4,15 @@ public class PickFplTeamOptions
 {
     public int MaxPlayersPerTeam { get; set; } = int.MaxValue;
 
-    public int Budget { get; set; } = int.MaxValue;
+    /// <summary>
+    /// Budget in millions
+    /// </summary>
+    public decimal BudgetMillions { get; set; } = int.MaxValue;
+
+    /// <summary>
+    /// Budget, in 10s of currency units.
+    /// </summary>
+    public int Budget => (int)(BudgetMillions * 10);
 
     public int NumberGoalkeepers { get; set; }
 
