@@ -76,59 +76,60 @@ namespace Audacia.OrToolsPlayground.Examples.PickFplTeam
                 }
                 else
                 {
-                    model.TeamSelectionCounts.Add(fplPlayer.Team, new List<IntVar> { teamSelected });
+                    model.TeamSelectionCounts.Add(fplPlayer.Team, [teamSelected]);
                 }
             }
         }
 
         private void AddObjective(PickFplTeamCpModel model)
         {
-            var points = _request.Players.Select(r => r.PercentSelectedBy).ToList();
-            var goalkeeperPoints = LinearExpr.ScalProd(model.SelectedGoalkeepers, points);
-            var defenderPoints = LinearExpr.ScalProd(model.SelectedDefenders, points);
-            var midfielderPoints = LinearExpr.ScalProd(model.SelectedMidfielders, points);
-            var forwardPoints = LinearExpr.ScalProd(model.SelectedForwards, points);
-            model.Maximize(goalkeeperPoints + defenderPoints + midfielderPoints + forwardPoints);
+            // Get the scale product of the selection booleans and multiply by each player's selection, maximizing the total.
+            var allPlayerSelections = _request.Players.Select(p => p.PercentSelectedBy).ToList();
+            var goalkeepersSelection = LinearExpr.ScalProd(model.SelectedGoalkeepers, allPlayerSelections);
+            var defendersSelection = LinearExpr.ScalProd(model.SelectedDefenders, allPlayerSelections);
+            var midfieldersSelection = LinearExpr.ScalProd(model.SelectedMidfielders, allPlayerSelections);
+            var forwardsSelection = LinearExpr.ScalProd(model.SelectedForwards, allPlayerSelections);
+
+            model.Maximize(goalkeepersSelection + defendersSelection + midfieldersSelection + forwardsSelection);
         }
 
         private void AddConstraints(PickFplTeamCpModel model)
         {
-            AddMaxPerTeamConstraint(model);
-
             AddPositionConstraints(model);
+
+            AddMaxPerTeamConstraint(model);
 
             AddCostConstraint(model);
         }
 
-        private void AddCostConstraint(PickFplTeamCpModel model)
-        {
-            var allCosts = _request.Players.Select(r => r.Cost).ToList();
-
-            var goalkeeperCost = LinearExpr.ScalProd(model.SelectedGoalkeepers, allCosts);
-            var defenderCost = LinearExpr.ScalProd(model.SelectedDefenders, allCosts);
-            var midfielderCost = LinearExpr.ScalProd(model.SelectedMidfielders, allCosts);
-            var forwardCost = LinearExpr.ScalProd(model.SelectedForwards, allCosts);
-            model.Add((goalkeeperCost + defenderCost + midfielderCost + forwardCost) <= _request.Options.Budget);
-        }
-
         private void AddPositionConstraints(PickFplTeamCpModel model)
         {
-            var numberSelectedGoalkeepers = new SumArray(model.SelectedGoalkeepers);
-            var numberSelectedDefenders = new SumArray(model.SelectedDefenders);
-            var numberSelectedMidfielders = new SumArray(model.SelectedMidfielders);
-            var numberSelectedForwards = new SumArray(model.SelectedForwards);
-            model.Add(numberSelectedGoalkeepers == _request.Options.NumberGoalkeepers);
-            model.Add(numberSelectedDefenders == _request.Options.NumberDefenders);
-            model.Add(numberSelectedMidfielders == _request.Options.NumberMidfielders);
-            model.Add(numberSelectedForwards == _request.Options.NumberForwards);
+            // Sum up the selections for each position, and ensure it matches the number of players required per position.
+            model.Add(new SumArray(model.SelectedGoalkeepers) == _request.Options.NumberGoalkeepers);
+            model.Add(new SumArray(model.SelectedDefenders) == _request.Options.NumberDefenders);
+            model.Add(new SumArray(model.SelectedMidfielders) == _request.Options.NumberMidfielders);
+            model.Add(new SumArray(model.SelectedForwards) == _request.Options.NumberForwards);
         }
 
         private void AddMaxPerTeamConstraint(PickFplTeamCpModel model)
         {
-            foreach (var (_, selectedPlayers) in model.TeamSelectionCounts)
+            // Sum up the selections for each team, and ensure it doesn't exceed the maximum number of players per team.
+            foreach (var (_, selections) in model.TeamSelectionCounts)
             {
-                model.Add(new SumArray(selectedPlayers) <= _request.Options.MaxPlayersPerTeam);
+                model.Add(new SumArray(selections) <= _request.Options.MaxPlayersPerTeam);
             }
+        }
+
+        private void AddCostConstraint(PickFplTeamCpModel model)
+        {
+            // Get the scale product of the selection booleans and multiply by each player's cost.
+            var allPlayerCosts = _request.Players.Select(p => p.Cost).ToList();
+            var goalkeepersCost = LinearExpr.ScalProd(model.SelectedGoalkeepers, allPlayerCosts);
+            var defendersCost = LinearExpr.ScalProd(model.SelectedDefenders, allPlayerCosts);
+            var midfieldersCost = LinearExpr.ScalProd(model.SelectedMidfielders, allPlayerCosts);
+            var forwardsCost = LinearExpr.ScalProd(model.SelectedForwards, allPlayerCosts);
+
+            model.Add(goalkeepersCost + defendersCost + midfieldersCost + forwardsCost <= _request.Options.Budget);
         }
 
         private static FplPlayerSelectionVar GetSelectionVar(PickFplTeamCpModel model, FplPlayer fplPlayer)

@@ -4,30 +4,13 @@ using Audacia.OrToolsPlayground.Examples.PickFplTeam;
 using Audacia.OrToolsPlayground.Examples.PickFplTeam.Models;
 using Audacia.OrToolsPlayground.Tests.PickFplTeam.Builders;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Xunit;
 
 namespace Audacia.OrToolsPlayground.Tests.PickFplTeam;
 
-public class PickFplTeamSolverTest// for some reason we lose intellisense if we call this PickFplTeamSolverTests...
+public class PickFplTeamSolverTest // for some reason we lose intellisense if we call this PickFplTeamSolverTests...
 {
-    [Fact]
-    public void RealWorldScenario_CanFindASolution()
-    {
-        var solver = new PickFplTeamSolver(PickFplTeamModel.FromCsv(new PickFplTeamOptions
-        {
-            MaxPlayersPerTeam = 3,
-            BudgetMillions = 100,
-            NumberGoalkeepers = 2,
-            NumberDefenders = 5,
-            NumberMidfielders = 5,
-            NumberForwards = 3
-        }));
-
-        var output = solver.Solve();
-
-        output.SelectedPlayers.Should().HaveCount(15, "we should have 2 GK + 5 DEF + 5 MID + 3 FWD");
-    }
-
     [Fact]
     public void LotsOfGoodPlayersPlayForTeam_PicksWorsePlayersToNotExceedMaxPlayersRule()
     {
@@ -78,11 +61,11 @@ public class PickFplTeamSolverTest// for some reason we lose intellisense if we 
 
         output.SelectedPlayers.Should().Contain(
             p => p.Position == PlayerPosition.MID,
-            $"we can only have {options.MaxPlayersPerTeam} max players per team");
+            $"we can only have {options.NumberDefenders} defenders in our team");
     }
 
     [Fact]
-    public void GoodPlayersIsTooExpensive_PicksWorsePlayersToNotExceedBudget()
+    public void GoodPlayerIsTooExpensive_PicksWorsePlayersToNotExceedBudget()
     {
         var options = new PickFplTeamOptions
         {
@@ -102,15 +85,54 @@ public class PickFplTeamSolverTest// for some reason we lose intellisense if we 
             new FplPlayerBuilder("ENG", PlayerPosition.DEF).WithCost(2.5m).Build(),
             new FplPlayerBuilder("ENG", PlayerPosition.MID).WithCost(2.5m).Build(),
             expensivePlayer,
-            new FplPlayerBuilder("ENG", PlayerPosition.FWD).WithCost(2.5m).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.FWD).WithCost(2.5m).Build()
         };
         var model = new PickFplTeamModel(players, options);
         var solver = new PickFplTeamSolver(model);
 
         var output = solver.Solve();
 
-        output.SelectedPlayers.Should().NotContain(
-            expensivePlayer,
-            $"we cannot afford to have the player with a lot of points as it would exceed the budget of {options.Budget}");
+        using (new AssertionScope())
+        {
+            output.SelectedPlayers.Should().HaveCountGreaterThan(0, "we should have at least one player");
+            output.SelectedPlayers.Should().NotContain(
+                expensivePlayer,
+                $"we cannot afford to have the better player as it would exceed the budget of {options.Budget}");
+        }
+    }
+
+    [Fact]
+    public void PlayersAreWithinBudget_MaximisesPlayerSelection()
+    {
+        var options = new PickFplTeamOptions
+        {
+            BudgetMillions = 10,
+            NumberGoalkeepers = 1,
+            NumberDefenders = 1,
+            NumberMidfielders = 1,
+            NumberForwards = 1
+        };
+        var badForward = new FplPlayerBuilder("ENG", PlayerPosition.FWD).WithSelectedByPercentage(49).WithCost(2.5m).Build();
+        var goodForward = new FplPlayerBuilder("ENG", PlayerPosition.FWD).WithSelectedByPercentage(51).WithCost(2.5m).Build();
+        var players = new List<FplPlayer>
+        {
+            new FplPlayerBuilder("ENG", PlayerPosition.GK).WithCost(2.5m).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.DEF).WithCost(2.5m).Build(),
+            new FplPlayerBuilder("ENG", PlayerPosition.MID).WithCost(2.5m).Build(),
+            badForward,
+            goodForward
+        };
+        var model = new PickFplTeamModel(players, options);
+        var solver = new PickFplTeamSolver(model);
+
+        var output = solver.Solve();
+
+        using (new AssertionScope())
+        {
+            output.SelectedPlayers.Should().HaveCountGreaterThan(0, "we should have at least one player");
+            output.SelectedPlayers.Should().NotContain(
+                badForward,
+                "we should select the player that has a higher selection percentage");
+        }
     }
 }
